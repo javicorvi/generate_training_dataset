@@ -34,7 +34,7 @@ def Main(parameters):
         sys.exit(1)
     
     remove_goldanswer_articles_from_random(gold_anwser_file, random_retrieval_file)
-    #generate_training_dataset(gold_anwser_file, quantity_gold_answer,random_retrieval_file, quantity_random_answer, dataset_output_file)
+    generate_training_dataset(gold_anwser_file, quantity_gold_answer,random_retrieval_file, quantity_random_answer, dataset_output_file)
   
 def ReadParameters(args):
     if(args.p!=None):
