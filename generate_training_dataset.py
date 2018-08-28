@@ -23,7 +23,6 @@ def Main(parameters):
     random_retrieval_file= parameters['random_retrieval_file']
     quantity_gold_answer=parameters['quantity_gold_answer']
     quantity_random_answer=parameters['quantity_random_answer']
-    
     if not os.path.exists(gold_anwser_file):
         print("The Gold Anwser File not exist: " +  gold_anwser_file)
         logging.error("The Gold Anwser File not exist: " +  gold_anwser_file)
@@ -58,19 +57,32 @@ def remove_goldanswer_articles_from_random(gold_anwser_file, random_retrieval_fi
             data = re.split(r'\t+', line)
             gold_ids_list.append(data[1])
     gold_file.close()
+    total_articles_errors = 0
+    total_articles_deleted = 0
     with open(random_retrieval_file+".tmp",'w') as new_random_file:
         with open(random_retrieval_file,'r') as random_file:
             for line in random_file:
-                data = re.split(r'\t+', line)
-                if any(data[1] in s for s in gold_ids_list):
-                    logging.info("delete from random " + data[1])
-                else:
-                    new_random_file.write(line)
-                    new_random_file.flush()
+                try:
+                    data = re.split(r'\t+', line)
+                    if(len(data)==4):
+                        if any(data[1] in s for s in gold_ids_list):
+                            logging.info("delete from random " + data[1])
+                            total_articles_deleted = total_articles_deleted + 1
+                        else:
+                            new_random_file.write(line)
+                            new_random_file.flush()
+                    else:
+                        logging.info("this record is wrong " + line)
+                except Exception as inst:
+                    total_articles_errors = total_articles_errors + 1
+                    #logging.error("The article with id : " + id + " could not be processed. Cause:  " +  str(inst))
+                    logging.error("Error reading article the cause probably: contained an invalid character ")       
         random_file.close()
     new_random_file.close()  
     os.remove(random_retrieval_file) 
     os.rename(random_retrieval_file+".tmp", random_retrieval_file)  
+    logging.info("Total articles with character invalid: "  +  str(total_articles_errors))
+    logging.info("Total articles deleted from random: "  +  str(total_articles_deleted))
     logging.info(" End of process") 
        
 def generate_training_dataset(gold_answer_file, quantity_gold_answer,random_retrieval_file, quantity_random_answer, dataset_output_file):
