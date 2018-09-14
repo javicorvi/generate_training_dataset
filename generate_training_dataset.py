@@ -33,8 +33,10 @@ def Main(parameters):
         sys.exit(1)
     
     remove_goldanswer_articles_from_random(gold_anwser_file, random_retrieval_file)
+    #format_limtox1_0_to_limtox2_0(gold_anwser_file, random_retrieval_file)
     generate_training_dataset(gold_anwser_file, quantity_gold_answer,random_retrieval_file, quantity_random_answer, dataset_output_file)
-  
+    curated_training_dataset(dataset_output_file)
+    
 def ReadParameters(args):
     if(args.p!=None):
         Config = ConfigParser.ConfigParser()
@@ -88,4 +90,46 @@ def remove_goldanswer_articles_from_random(gold_anwser_file, random_retrieval_fi
 def generate_training_dataset(gold_answer_file, quantity_gold_answer,random_retrieval_file, quantity_random_answer, dataset_output_file):
     logging.info(" Generating DataSet for Training")
     subprocess.check_call("./trainning_test_split.bash %s %s %s %s %s" % (gold_answer_file, str(quantity_gold_answer), random_retrieval_file, str(quantity_random_answer), dataset_output_file),   shell=True)
-    logging.info(" End DataSet Training Generator")        
+    logging.info(" End DataSet Training Generator")  
+    
+
+
+def format_limtox1_0_to_limtox2_0(gold_anwser_file, random_retrieval_file):
+    logging.info(" Format files form limtox 1.0 to limtox 2.0")
+    with open(gold_anwser_file+".tmp",'w') as new_gold_anwser_file:
+        with open(gold_anwser_file,'r') as gold_file:
+            for line in gold_file:
+                line = 'hepatotoxicity' + '\t' + line
+                new_gold_anwser_file.write(line)
+                new_gold_anwser_file.flush()
+        gold_file.close()
+    new_gold_anwser_file.close()
+    os.remove(gold_anwser_file) 
+    os.rename(gold_anwser_file+".tmp", gold_anwser_file) 
+    with open(random_retrieval_file+".tmp",'w') as new_random_retrieval_file:
+        with open(random_retrieval_file,'r') as random_file:
+            for line in random_file:
+                line = 'random' + '\t' + line
+                new_random_retrieval_file.write(line)
+                new_random_retrieval_file.flush()
+        random_file.close()
+    new_random_retrieval_file.close()
+    os.remove(random_retrieval_file) 
+    os.rename(random_retrieval_file+".tmp", random_retrieval_file) 
+    logging.info(" End of process") 
+
+
+def curated_training_dataset(dataset_output_file):
+    logging.info("Curated File " + dataset_output_file)
+    with open(dataset_output_file+".tmp",'w') as new_dataset_output_file:
+        with open(dataset_output_file,'r') as dataset_file:
+            for line in dataset_file:
+                data = re.split(r'\t+', line)
+                if(len(data)==4):
+                    new_dataset_output_file.write(line)
+                    new_dataset_output_file.flush()
+        dataset_file.close()
+    new_dataset_output_file.close()
+    os.remove(dataset_output_file) 
+    os.rename(dataset_output_file+".tmp", dataset_output_file) 
+    logging.info(" End of process")     
