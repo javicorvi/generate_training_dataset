@@ -5,7 +5,7 @@ import argparse
 import ConfigParser
 import re
 import logging
-
+from shutil import copyfile
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 parser=argparse.ArgumentParser()
@@ -40,16 +40,15 @@ def Main(parameters):
     random_folder = classes_folder_[len(classes_folder_)-1]
     random_quantity = quantity_for_class_[len(quantity_for_class_)-1]
     i=0
-    for clas, quantity in zip(classes_folder_, quantity_for_class_):
+    for clas, quantity in zip(classes_folder_[:len(classes_folder_)-1], quantity_for_class_[:len(quantity_for_class_)-1]):
+        i=i+1
         generate_training_dataset(clas, quantity, random_folder, random_quantity, dataset_output_file+"_"+str(i))
         random_quantity = random_quantity + quantity
-        random_folder = dataset_output_file+"_"+i
-        i=i+1
-    #generate_training_dataset(classes_folder, quantity_for_class, dataset_output_file)
+        random_folder = dataset_output_file+"_"+str(i)
+    copyfile(dataset_output_file+"_"+str(i), dataset_output_file)
     
-    #format_limtox1_0_to_limtox2_0(gold_anwser_file, random_retrieval_file)
-    #
-    #curated_training_dataset(dataset_output_file)
+    
+    
     
 def generate_training_dataset(gold_answer_file, quantity_gold_answer,random_retrieval_file, quantity_random_answer, dataset_output_file):
     logging.info(" Generating DataSet for Training")
