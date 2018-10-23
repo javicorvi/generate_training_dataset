@@ -89,7 +89,7 @@ def remove_goldanswer_articles_from_random(gold_anwser_file, random_retrieval_fi
        
 def generate_training_dataset(gold_answer_file, quantity_gold_answer,random_retrieval_file, quantity_random_answer, dataset_output_file):
     logging.info(" Generating DataSet for Training")
-    subprocess.check_call("./training_test_split.bash %s %s %s %s %s" % (gold_answer_file, str(quantity_gold_answer), random_retrieval_file, str(quantity_random_answer), dataset_output_file),   shell=True)
+    subprocess.check_call("./training_split.bash %s %s %s %s %s" % (gold_answer_file, str(quantity_gold_answer), random_retrieval_file, str(quantity_random_answer), dataset_output_file),   shell=True)
     logging.info(" End DataSet Training Generator")  
     
 
